@@ -72,6 +72,8 @@ $(function() {
 			} else if (data.type == "FUNCTION") {
 				if (data.message=='resumeQueue') {
 					self.resumeQueue();
+				} elif (data.message=='startQueue') {
+					self.startQueue();
 				}
 			} else if (data.type == "L"){
 				self.lightStatus("Lights "+ data.message +"%");
@@ -101,18 +103,17 @@ $(function() {
 				console.log(data);
 			}
 		}
+		
+		// k.o. button functions from jinja pages
 		self.lightButtonFunction = function() {
-		  //console.log("Light button was clicked");
 		  OctoPrint.simpleApiCommand("protosthetics","lightToggle");
 		}
 		
 		self.dryerButtonFunction = function() {
-			//console.log("Dryer button was clicked");
 			OctoPrint.simpleApiCommand("protosthetics","dryerToggle");
 		}
 		
 		self.printerPowerFunction = function() {
-			//console.log("Other Button was pressed");
 			OctoPrint.simpleApiCommand("protosthetics","printerToggle");
 		}
 		
@@ -120,9 +121,22 @@ $(function() {
 			OctoPrint.simpleApiCommand("protosthetics","changeFilament");
 		}
 		
+		// js functions from python pages
 		self.resumeQueue = function() {
 			$.ajax({
 				url: "plugin/continuousprint/resumequeue",
+				type: "GET",
+				dataType: "json",
+				headers: {
+					"X-Api-Key":UI_API_KEY,
+				},
+				data: {}
+			});
+		}
+		
+		self.startQueue = function() {
+			$.ajax({
+				url: "plugin/continuousprint/startqueue",
 				type: "GET",
 				dataType: "json",
 				headers: {

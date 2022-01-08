@@ -28,6 +28,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
     self.button1.when_pressed = self.buttonPress
     self.button1.when_released = self.buttonRelease
     self.button1.when_held = self.longPress
+    self.button1holding = False
     self.custom_mode = 0
     
     self.button2.when_pressed = self.reportDHT
@@ -105,8 +106,14 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
   # Button status: B?
   # where ? is 0 for press, 1 for release, 2 for held
   def buttonRelease(self):
+    # Only run this code if the button was not held
+    if self.button1holding:
+      return
     #self.led.off()
     self.sendMessage('B1','release')
+    if self._printer.is_ready():
+      self.sendMessage('FUNCTION','startQueue')
+    # does it hurt to start and resume here?
     self.sendMessage('FUNCTION','resumeQueue')
     #self._plugin_manager.send_plugin_message(self._identifier, 'B1')
 	
@@ -114,9 +121,11 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
     #self.led.on()
     self.sendMessage('POP','Button was pressed')
     self.sendMessage('B1','press')
+    self.button1holding = False
     
   def longPress(self):
     self.sendMessage('B1','held')
+    self.button1holding = True
     #self.led.blink(0.05,0.05,5)  #change this to be LED indicator
     self.send('P5')  #juggle pattern
     #self._plugin_manager.send_plugin_message(self._identifier, 'L%i' %self.led.value)
