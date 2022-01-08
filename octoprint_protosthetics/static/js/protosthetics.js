@@ -72,7 +72,7 @@ $(function() {
 			} else if (data.type == "FUNCTION") {
 				if (data.message=='resumeQueue') {
 					self.resumeQueue();
-				} elif (data.message=='startQueue') {
+				} else if (data.message=='startQueue') {
 					self.startQueue();
 				}
 			} else if (data.type == "L"){
