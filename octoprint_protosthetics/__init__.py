@@ -6,35 +6,36 @@ from .DHT20 import DFRobot_DHT20 as DHT
 import octoprint.plugin
 from octoprint.util import RepeatedTimer
 
-class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
-                       octoprint.plugin.AssetPlugin,
-                       octoprint.plugin.ProgressPlugin,
-                       octoprint.plugin.EventHandlerPlugin,
-                       octoprint.plugin.StartupPlugin,
-                       octoprint.plugin.ShutdownPlugin,
-                       octoprint.plugin.SettingsPlugin,
-                       octoprint.plugin.SimpleApiPlugin):
+class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on the dashboard
+                       octoprint.plugin.AssetPlugin,            # to use javaScript
+                       octoprint.plugin.ProgressPlugin,         # to display print progress
+                       octoprint.plugin.EventHandlerPlugin,     # to respond to file uploads and show LED status for other events
+                       octoprint.plugin.StartupPlugin,          # to get buttons and functions set up at the beginning
+                       octoprint.plugin.ShutdownPlugin,         # to close out all the hardware connections
+                       octoprint.plugin.SettingsPlugin,         # to change and test some variables
+                       octoprint.plugin.SimpleApiPlugin):       # to let the JavaScript call python functions
 					   
   def __init__(self):
     self.button1 = Button(4, hold_time=3, pull_up=None, active_state=True)
-    self.button2 = Button(5, hold_time=3, pull_up=None, active_state=True)
-    self.button3 = Button(6, hold_time=3, pull_up=None, active_state=True)
+    self.button2 = Button(5, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
+    self.button3 = Button(6, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
     self.printer = DigitalOutputDevice(22, active_high=False, initial_value=True)
     self.dryer   = DigitalOutputDevice(23, active_high=True, initial_value=False)
     self.led = PWMLED(12, initial_value=0, frequency=8000)
-    self.flash = DigitalOutputDevice(17, active_high=False, initial_value=False)
-    self.ESPreset = DigitalOutputDevice(16, active_high=False, initial_value=False)
+    self.flash = DigitalOutputDevice(17, active_high=False, initial_value=False)    # for flashing the ESP8266 firmware
+    self.ESPreset = DigitalOutputDevice(16, active_high=False, initial_value=False) # for flashing the ESP8266 firmware
     
     self.button1.when_pressed = self.buttonPress
     self.button1.when_released = self.buttonRelease
     self.button1.when_held = self.longPress
-    self.button1holding = False
-    self.custom_mode = 0
+    self.button1holding = False     # to skip the release function when the holding function was executed
+    self.custom_mode = 0            # for custom pausing reasons 
     
     self.button2.when_pressed = self.reportDHT
     
     
   def on_after_startup(self):
+    # Try to connect to the DHT20 sensor and establish a recurring reading
     try:
       self.dht = DHT(0x01,0x38)  #use i2c port 1 and address 0x38
       self.dht.begin()
@@ -46,6 +47,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
       self.sendMessage("INFO","DHT error")
       self._logger.warning("DHT connection error")
       
+    # Try to connect to the ESP8266 over serial
     try:
       self.com = serial.Serial('/dev/ttyS0', 9600)
       self.hasSerial = True
@@ -57,6 +59,9 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
     
     self._logger.info("Protosthetics ≈ %i %i" %(self._settings.get(["hum_low"]), self._settings.get(["hum_high"])))
   
+  # close all gpio zero connections and shut down the timer
+  # This is likely not needed, as the plugin only shuts down then the system is restarting
+  # But better safe than... not safe.
   def on_shutdown(self):
     self.button1.close()
     self.button2.close()
@@ -68,14 +73,19 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
     self.ESPreset.close()
     self.updateTimer.cancel()
   
-  
+  # for settings plugin
   def get_template_vars(self):
     return dict(words=self._settings.get(["words"]),
 	            hum_low=self._settings.get(["hum_low"]),
                 hum_high=self._settings.get(["hum_high"]),
                 )
-  
 
+  # for settings plugin
+  def get_settings_defaults(self):
+    return dict(hum_low=30,
+                hum_high=40
+                )
+  # what templates will be used
   def get_template_configs(self):
     return [
       #dict(type="navbar"),
@@ -83,57 +93,59 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
       dict(type="sidebar")
     ]
   
+  # what assets are we providing
   def get_assets(self):
     return {
       "js": ["js/protosthetics.js"],
       "css": ["css/protosthetics.css"]
     }
     
-  def get_settings_defaults(self):
-    return dict(hum_low=30,
-                hum_high=40
-                )
-    
+  # for reporting the current print progress for LED display
   def on_print_progress(self,storage,path,progress):
-    self.sendMessage('PROGRESS',progress)
-    #self._plugin_manager.send_plugin_message(self._identifier, str(progress))
+    self.sendMessage('PROGRESS',progress)  # This displays it in the console (for debugging)
     if progress == 100:
       # don't send (use print_done event instead)
       return
+    
+    self.send('C1')  #party colors
     self.send('P8') #progress bar with plasma
     self.send('D%i' %progress)
 
-  # Button status: B?
-  # where ? is 0 for press, 1 for release, 2 for held
+  # bound to button 1 release
   def buttonRelease(self):
     # Only run this code if the button was not held
     if self.button1holding:
       return
-    #self.led.off()
+    # report to front end
     self.sendMessage('B1','release')
+    # start the next print, or resume the print
     if self._printer.is_ready():
       self.sendMessage('FUNCTION','startQueue')
     # does it hurt to start and resume here?
     self.sendMessage('FUNCTION','resumeQueue')
-    #self._plugin_manager.send_plugin_message(self._identifier, 'B1')
+    # TODO:  if the printer is paused, resume
+    # TODO:  if the printer is printing, pause
 	
+  # bound to button 1 press
   def buttonPress(self):
-    #self.led.on()
     self.sendMessage('POP','Button was pressed')
+    # report to front end
     self.sendMessage('B1','press')
+    # reset held variable
     self.button1holding = False
     
+  # bound to button 1 long-press (hold)
   def longPress(self):
+    # report to front end
     self.sendMessage('B1','held')
     self.button1holding = True
-    #self.led.blink(0.05,0.05,5)  #change this to be LED indicator
     self.send('P5')  #juggle pattern
-    #self._plugin_manager.send_plugin_message(self._identifier, 'L%i' %self.led.value)
-    self._logger.info('~~~~~~~~~~~~~~~~~~~~~~')
     self.mode = self._printer.get_state_id()
     self._logger.info(self.mode)
     
-    
+    # if the printer is in some paused state...
+    # run M108, which will finish the filament change and resume the print
+    # or just resume the print if a regular pause
     if self.mode == "PAUSED" or self.mode == "PAUSING" or self.custom_mode == "PAUSED":
       # break and continue (after filament change)
       self._printer.commands("M108")
@@ -145,13 +157,16 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
         self._printer.set_temperature('tool0',self.whatItWas)
         self.led.on()
       self.sendMessage('FIL','')
-    # if printing, do something different here
+    # if printing, initiate a filament change
     elif self._printer.is_printing():
+      self._printer.commands("M117 Changing filament")
       # change filament command
       self._printer.commands("M600")
-      self._logger.info('Theoretically pausing')
       self.sendMessage('FIL','Press when new filament is ready')
+    # if sitting idle, initiate a filament change
     elif self._printer.is_ready():
+      # if the printer is not at an extruding temperature
+      # save the current temperature, set a new one, and wait for it to be hot enough
       temps = self._printer.get_current_temperatures()
       self.whatItWas = temps.get('tool0').get('target')
       self._logger.info(temps)
@@ -163,16 +178,17 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
         else:
           self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
       self._printer.commands("M600")
-      self.led.on()
+      self.led.on()  # turn the lights on for filament change
       self.custom_mode = "PAUSED"
       self.sendMessage('FIL','Press when new filament is ready')
         
-        
+  # read the DHT20 sensor and report to front end
   def reportDHT(self):
     temp = self.dht.get_temperature()
     hum  = self.dht.get_humidity()
     self.sendMessage('Temp',temp)
     self.sendMessage('Hum',hum)
+    # TODO:  move the humidifier to its own function
     if hum > self._settings.get(['hum_high']):
       self.dryer.on()
       self.sendMessage('DRYER',1)
@@ -180,14 +196,17 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
       self.dryer.off()
       self.sendMessage('DRYER',0)
         
+  # send data to the ESP8266
   def send(self, data):
     if self.hasSerial:
       self.com.write((data + '\n').encode())
       
+  # send data to the front end
   def sendMessage(self, type, message):
     payload = {"type": type, "message": message}
     self._plugin_manager.send_plugin_message(self._identifier, payload)
         
+  # things the front end can tell python
   def get_api_commands(self):
     return dict(
                   lightToggle=[],
@@ -199,6 +218,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
                   settings=['variable','data']
                )
 
+  # handling what the front end tells python
   def on_api_command(self,command,data):
     self._logger.info(command+str(data))
     if command == 'lightToggle':
@@ -229,6 +249,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
       self.led.value = 10**(int(data.get('payload'))/50)/100
       self.sendMessage('L',self.led.value*100)
                
+  # responding to printer events
+  # some for code, some for LED patterns
   def on_event(self,event,payload):
     if event == octoprint.events.Events.ERROR:
       self.sendMessage('ERROR','Error event reported:\n' + payload.get('error'))
@@ -252,6 +274,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
       self.send('C2')  #Lava colors
     if event == octoprint.events.Events.PRINT_FAILED:
       self.sendMessage('INFO','Error: Print Failed - ' + payload.get('reason'))
+    # if a firmware file was uploaded, pass it to the ESP8266
     if event == octoprint.events.Events.FILE_ADDED:
       self._logger.warning('FILE ADDED!!!' + payload.get('name'))
       if payload.get('name').endswith('.bin.gcode'):
@@ -262,6 +285,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
         if not self.hasSerial:
           self._logger.warning("Serial not initialized, use raspi-config")
           return
+        # everything checks out, begin upload process
         self._plugin_manager.send_plugin_message(self._identifier, 'new firmware found')
         uploads = '/home/pi/.octoprint/uploads'
         files = os.listdir(uploads)
@@ -270,7 +294,6 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,
             os.system('mv '+uploads+'/'+file+' '+uploads+'/LEDfirmware.bin')
             
             self._plugin_manager.send_plugin_message(self._identifier, 'uploading new firmware!')
-            # add the reset pin sequence here when the new hat
             self.flash.on()
             self.ESPreset.on()
             time.sleep(0.1)
