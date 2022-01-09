@@ -213,6 +213,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
                   dryerToggle=[],
                   printerToggle=[],
                   changeFilament=[],
+                  resetESP=[],
                   passSerial=['payload'],
                   brightness=['payload'],
                   settings=['variable','data']
@@ -239,6 +240,11 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self.sendMessage('P',self.printer.value)
     elif command == 'changeFilament':
       self.longPress()
+    elif command == 'resetESP':
+      self.flash.off()
+      self.ESPreset.on()
+      time.sleep(0.1)
+      self.ESPreset.off()
     elif command == 'settings':
       self._settings.set([data.get('variable')], data.get('data'))
       self._settings.save()

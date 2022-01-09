@@ -121,6 +121,10 @@ $(function() {
 			OctoPrint.simpleApiCommand("protosthetics","changeFilament");
 		}
 		
+		self.resetESPFunction = function() {
+			OctoPrint.simpleApiCommand("protosthetics","resetESP");
+		}
+		
 		// js functions from python pages
 		self.resumeQueue = function() {
 			$.ajax({
