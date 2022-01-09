@@ -2,7 +2,9 @@
     <div class="control-group">
         <label class="control-label">Serial command to ESP</label>
         <div class="controls">
-            <input type="text" class="input-block-level" data-bind="value: passSerial"> <button class='btn btn-primary'>Send</button>
+            <input type="text" class="input-block-level" data-bind="value: passSerial"> 
+			<button class='btn btn-primary'>Send</button>
+			<button class='btn' data-bind="click: resetESPFunction">Reset ESP</button>
 		</div>
 		<label class="control-label">High humidity trigger </label>
 		<div class="controls">
