@@ -13,7 +13,7 @@ $(function() {
 		
 		self.passSerial = ko.observable("Ready");
 		self.printerStatus = ko.observable("Printer ON");
-		self.printerStatusClass = ko.observable("btn btn-success");
+		self.printerStatusClass = ko.observable("btn btn-block btn-success");
 		self.dryerStatus = ko.observable("Dryer OFF");
 		self.buttonStatus = ko.observable("Ready");
 		self.lightStatus = ko.observable("Lights ON");
@@ -89,10 +89,10 @@ $(function() {
 			} else if (data.type=="P"){
 				if (data.message==1) {
 					self.printerStatus("Printer ON");
-					self.printerStatusClass("btn btn-success");
+					self.printerStatusClass("btn btn-block btn-success");
 				} else if (data.message==0) {
 					self.printerStatus("Printer OFF");
-					self.printerStatusClass("btn btn-danger");
+					self.printerStatusClass("btn btn-block btn-danger");
 				}
 			} else if (data.type=="B1") {
 				self.buttonStatus(data.message);

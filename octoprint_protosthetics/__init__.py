@@ -183,6 +183,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self.custom_mode = "PAUSED"
       self.sendMessage('FIL','Press when new filament is ready')
     self.led.on()  # turn the lights on for filament change
+    self.sendMessage('L',self.led.value*100)
     
   # read the DHT20 sensor and report to front end
   def reportDHT(self):
