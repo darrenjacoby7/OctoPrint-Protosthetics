@@ -122,6 +122,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     if self._printer.is_ready():
       self.sendMessage('FUNCTION','startQueue')
     # does it hurt to start and resume here?
+    # For the continuousPrint update, this changes to SetActive
+    self.sendMessage('FUNCTION','setActive')
     self.sendMessage('FUNCTION','resumeQueue')
     # TODO:  if the printer is paused, resume
     # TODO:  if the printer is printing, pause
@@ -140,6 +142,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     self.sendMessage('B1','held')
     self.button1holding = True
     self.send('P5')  #juggle pattern
+    self.led.blink(0.1,0.1,2,True)  #Blink front LEDs twice for 0.1 seconds (as a background task)
     self.mode = self._printer.get_state_id()
     self._logger.info(self.mode)
     
@@ -155,7 +158,6 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       if self.custom_mode:
         self.custom_mode = 0
         self._printer.set_temperature('tool0',self.whatItWas)
-        self.led.on()
       self.sendMessage('FIL','')
     # if printing, initiate a filament change
     elif self._printer.is_printing():

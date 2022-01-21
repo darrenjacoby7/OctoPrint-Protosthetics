@@ -12,10 +12,10 @@ $(function() {
 		//console.log(self.settings);
 		
 		self.passSerial = ko.observable("Ready");
-		self.printerStatus = ko.observable("Printer ON?");
-		self.dryerStatus = ko.observable("Dryer OFF?");
+		self.printerStatus = ko.observable("Printer ON");
+		self.dryerStatus = ko.observable("Dryer OFF");
 		self.buttonStatus = ko.observable("Ready");
-		self.lightStatus = ko.observable("Lights ON?");
+		self.lightStatus = ko.observable("Lights ON");
 		self.brightness = ko.observable(50);
 		self.temperature = ko.observable(0);
 		self.humidity = ko.observable(0);
@@ -74,6 +74,8 @@ $(function() {
 					self.resumeQueue();
 				} else if (data.message=='startQueue') {
 					self.startQueue();
+				} else if (data.message=='setActive') {
+					self.setActive();
 				}
 			} else if (data.type == "L"){
 				self.lightStatus("Lights "+ data.message +"%");
@@ -141,6 +143,18 @@ $(function() {
 		self.startQueue = function() {
 			$.ajax({
 				url: "plugin/continuousprint/startqueue",
+				type: "GET",
+				dataType: "json",
+				headers: {
+					"X-Api-Key":UI_API_KEY,
+				},
+				data: {}
+			});
+		}
+		
+		self.setActive = function() {
+			$.ajax({
+				url: "plugin/continuousprint/set_active",
 				type: "GET",
 				dataType: "json",
 				headers: {
