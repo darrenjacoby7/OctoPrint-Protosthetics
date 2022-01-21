@@ -16,7 +16,7 @@ $(function() {
 		self.printerStatusClass = ko.observable("btn btn-block btn-success");
 		self.dryerStatus = ko.observable("Dryer OFF");
 		self.buttonStatus = ko.observable("Ready");
-		self.lightStatus = ko.observable("Lights ON");
+		self.lightStatus = ko.observable("Lights OFF");
 		self.brightness = ko.observable(50);
 		self.temperature = ko.observable(0);
 		self.humidity = ko.observable(0);
