@@ -142,7 +142,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     self.sendMessage('B1','held')
     self.button1holding = True
     self.send('P5')  #juggle pattern
-    self.led.blink(0.1,0.1,n=2,background=True)  #Blink front LEDs twice for 0.1 seconds (as a background task)
+    self.led.blink(0.05,0.05,n=2,background=False)  #Blink front LEDs twice for 0.1 seconds
     self.mode = self._printer.get_state_id()
     self._logger.info(self.mode)
     
