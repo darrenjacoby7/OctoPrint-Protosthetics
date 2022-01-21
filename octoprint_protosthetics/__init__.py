@@ -130,7 +130,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
 	
   # bound to button 1 press
   def buttonPress(self):
-    self.sendMessage('POP','Button was pressed')
+    # self.sendMessage('POP','Button was pressed')
     # report to front end
     self.sendMessage('B1','press')
     # reset held variable
@@ -142,7 +142,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     self.sendMessage('B1','held')
     self.button1holding = True
     self.send('P5')  #juggle pattern
-    self.led.blink(0.1,0.1,2,True)  #Blink front LEDs twice for 0.1 seconds (as a background task)
+    self.led.blink(0.1,0.1,n=2,background=True)  #Blink front LEDs twice for 0.1 seconds (as a background task)
     self.mode = self._printer.get_state_id()
     self._logger.info(self.mode)
     
