@@ -121,12 +121,16 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     # start the next print, or resume the print
     if self._printer.is_ready():
       self.sendMessage('FUNCTION','startQueue')
-    # does it hurt to start and resume here?
-    # For the continuousPrint update, this changes to SetActive
-    self.sendMessage('FUNCTION','setActive')
-    self.sendMessage('FUNCTION','resumeQueue')
+      # does it hurt to start and resume here?
+      # For the continuousPrint update, this changes to SetActive
+      self.sendMessage('FUNCTION','setActive')
+      self.sendMessage('FUNCTION','resumeQueue')
     # TODO:  if the printer is paused, resume
+    if self._printer.is_paused():
+      self._printer.resume_print()
     # TODO:  if the printer is printing, pause
+    if self._printer.is_printing():
+      self._printer.pause_print()
 	
   # bound to button 1 press
   def buttonPress(self):
