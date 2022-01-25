@@ -163,7 +163,7 @@ $(function() {
 				headers: {
 					"X-Api-Key":UI_API_KEY,
 				},
-				data: {}
+				data: {active: true}
 			});
 		}
     }
