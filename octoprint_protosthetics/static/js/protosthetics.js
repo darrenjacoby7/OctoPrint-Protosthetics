@@ -158,7 +158,7 @@ $(function() {
 		self.setActive = function() {
 			$.ajax({
 				url: "plugin/continuousprint/set_active",
-				type: "GET",
+				type: "POST",
 				dataType: "json",
 				headers: {
 					"X-Api-Key":UI_API_KEY,
