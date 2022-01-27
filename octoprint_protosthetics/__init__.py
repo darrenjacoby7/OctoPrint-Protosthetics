@@ -129,7 +129,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     if self._printer.is_paused():
       self._printer.resume_print()
     # TODO:  if the printer is printing, pause
-    if self._printer.is_printing():
+    elif self._printer.is_printing():
       self._printer.pause_print()
 	
   # bound to button 1 press
