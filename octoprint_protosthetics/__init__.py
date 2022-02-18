@@ -290,6 +290,14 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     # if a firmware file was uploaded, pass it to the ESP8266
     if event == octoprint.events.Events.FILE_ADDED:
       self._logger.warning('FILE ADDED!!!' + payload.get('name'))
+      if payload.get('name').endswith('.sh.gcode'):
+        self.sendMessage('POP','Script loaded')
+        uploads = '/home/pi/.octoprint/uploads'
+        scripts = '/home/pi/.octoprint/scripts'
+        files = os.listdir(uploads)
+        for file in files:
+          if file.endswith('.sh.gcode'):
+            os.system('mv '+uploads+'/'+file+' '+scripts+'/'+file[:-6])
       if payload.get('name').endswith('.bin.gcode'):
         self._logger.info('Might be firmware')
         if not self._printer.is_ready():
