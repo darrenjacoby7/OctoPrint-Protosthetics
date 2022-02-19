@@ -77,6 +77,8 @@ $(function() {
 					self.startQueue();
 				} else if (data.message=='setActive') {
 					self.setActive();
+				} else if (data.message=='setNotActive') {
+					self.setNotActive();
 				}
 			} else if (data.type == "L"){
 				self.lightStatus("Lights "+ data.message +"%");
@@ -164,6 +166,18 @@ $(function() {
 					"X-Api-Key":UI_API_KEY,
 				},
 				data: {active: true}
+			});
+		}
+		
+		self.setNotActive = function() {
+			$.ajax({
+				url: "plugin/continuousprint/set_active",
+				type: "POST",
+				dataType: "json",
+				headers: {
+					"X-Api-Key":UI_API_KEY,
+				},
+				data: {active: false}
 			});
 		}
     }
