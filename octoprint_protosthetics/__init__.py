@@ -272,8 +272,11 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
         pass
         #restart printer and the print
         #printer off
+        self.printer.off()
         #wait
+        time.sleep(3)
         #printer on
+        self.printer.on()
         #wait
         #connect
         #restart print
@@ -287,8 +290,6 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self.send('C2')  #Lava colors
     if event == octoprint.events.Events.PRINT_FAILED:
       self.sendMessage('INFO','Error: Print Failed - ' + payload.get('reason'))
-    if event == octoprint.events.Events.ERROR:
-      self.sendMessage('POP',"Caught error state correctly")
     if event == octoprint.events.Events.DISCONNECTED:
       self.sendMessage('FUNCTION','setNotActive')
     # if a firmware file was uploaded, pass it to the ESP8266
