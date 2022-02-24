@@ -277,7 +277,9 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
         #printer on
         self.printer.on()
         #wait
+        time.sleep(3)
         #connect
+        self._printer.connect()
         #restart print
         #note how many times it failed
     if event == octoprint.events.Events.PRINT_STARTED:
