@@ -291,6 +291,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self.send('C2')  #Lava colors
     if event == octoprint.events.Events.PRINT_FAILED:
       self.sendMessage('INFO','Error: Print Failed - ' + payload.get('reason'))
+      self._printer.commands("G28 Z")
     if event == octoprint.events.Events.DISCONNECTED:
       self.sendMessage('FUNCTION','setNotActive')
     # if a firmware file was uploaded, pass it to the ESP8266
