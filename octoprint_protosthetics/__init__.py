@@ -268,7 +268,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
   def on_event(self,event,payload):
     if event == octoprint.events.Events.ERROR:
       self.sendMessage('INFO','Error event reported:\n' + payload.get('error'))
-      if payload.get('INFO').startswith('Autolevel'):
+      if payload.get('error').find('kill()'):
         #Printer halted. kill() called!
         #restart printer and the print
         #printer off
