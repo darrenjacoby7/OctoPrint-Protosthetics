@@ -183,6 +183,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
           self._printer.commands("M109 S220")
         else:
           self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
+      self._printer.commands("M117 Unloading filament, stand by")
       self._printer.commands("M600")
       self.custom_mode = "PAUSED"
       self.sendMessage('FIL','Press when new filament is ready')
@@ -266,7 +267,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
   # some for code, some for LED patterns
   def on_event(self,event,payload):
     if event == octoprint.events.Events.ERROR:
-      self.sendMessage('ERROR','Error event reported:\n' + payload.get('error'))
+      self.sendMessage('INFO','Error event reported:\n' + payload.get('error'))
       if payload.get('INFO').startswith('Autolevel'):
         #Printer halted. kill() called!
         #restart printer and the print
