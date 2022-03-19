@@ -167,6 +167,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     elif self._printer.is_printing():
       self._printer.commands("M117 Changing filament")
       # change filament command
+      self._printer.commands("M603 U120 L125")
+      # TODO: make these configurable variables
       self._printer.commands("M600")
       self.sendMessage('FIL','Press when new filament is ready')
     # if sitting idle, initiate a filament change
@@ -184,6 +186,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
         else:
           self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
       self._printer.commands("M117 Unloading filament, stand by")
+      self._printer.commands("M603 U120 L125")
       self._printer.commands("M600")
       self.custom_mode = "PAUSED"
       self.sendMessage('FIL','Press when new filament is ready')
@@ -292,7 +295,10 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self.send('C2')  #Lava colors
     if event == octoprint.events.Events.PRINT_FAILED:
       self.sendMessage('INFO','Error: Print Failed - ' + payload.get('reason'))
-      self._printer.commands("G28 Z")
+      self._printer.commands("G91") #set relative mode
+      self._printer.commands("G0 Z10") #lift z 10mm
+      #self._printer.commands("G28 Z")
+      # TODO make this configurable
     if event == octoprint.events.Events.DISCONNECTED:
       self.sendMessage('FUNCTION','setNotActive')
     # if a firmware file was uploaded, pass it to the ESP8266
@@ -308,7 +314,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
             os.system('mv '+uploads+'/'+file+' '+scripts+'/'+file[:-6])
       if payload.get('name').endswith('.bin.gcode'):
         self._logger.info('Might be firmware')
-        if not self._printer.is_ready():
+        if self._printer.is_printing():
           self._logger.warning("Do not try to upload new firmware while printing‼")
           return
         if not self.hasSerial:
@@ -322,6 +328,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
           if file.endswith('.bin.gcode'):
             os.system('mv '+uploads+'/'+file+' '+uploads+'/LEDfirmware.bin')
             
+            self.sendMessage("POP","Uploading new firmware")
             self._plugin_manager.send_plugin_message(self._identifier, 'uploading new firmware!')
             self.flash.on()
             self.ESPreset.on()
@@ -335,6 +342,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
             self.ESPreset.on()
             time.sleep(0.1)
             self.ESPreset.off()
+            self.sendMessage("POP","Firmware upload complete")
             break
 	
   def get_update_information(self):

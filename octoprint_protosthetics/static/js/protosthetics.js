@@ -61,7 +61,7 @@ $(function() {
 				console.log(data.message);
 			} else if (data.type == "POP"){
 				new PNotify({
-					title: 'Protosthetics?',
+					title: 'Protosthetics',
 					text: data.message,
 					type: 'success',
 					hide: true,
