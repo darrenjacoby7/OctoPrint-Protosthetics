@@ -78,12 +78,16 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     return dict(words=self._settings.get(["words"]),
 	            hum_low=self._settings.get(["hum_low"]),
                 hum_high=self._settings.get(["hum_high"]),
+                filament_load_length=self._settings.get(["filament_load_length"]),
+                filament_unload_length=self._settings.get(["filament_unload_length"])
                 )
 
   # for settings plugin
   def get_settings_defaults(self):
     return dict(hum_low=30,
-                hum_high=40
+                hum_high=40,
+                filament_load_length = 120,
+                filament_unload_length = 100
                 )
   # what templates will be used
   def get_template_configs(self):
@@ -120,15 +124,13 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     self.sendMessage('B1','release')
     # start the next print, or resume the print
     if self._printer.is_ready():
-      self.sendMessage('FUNCTION','startQueue')
+      # self.sendMessage('FUNCTION','startQueue')
       # does it hurt to start and resume here?
       # For the continuousPrint update, this changes to SetActive
       self.sendMessage('FUNCTION','setActive')
-      self.sendMessage('FUNCTION','resumeQueue')
-    # TODO:  if the printer is paused, resume
+      # self.sendMessage('FUNCTION','resumeQueue')
     if self._printer.is_paused():
       self._printer.resume_print()
-    # TODO:  if the printer is printing, pause
     elif self._printer.is_printing():
       self._printer.pause_print()
 	
@@ -167,7 +169,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     elif self._printer.is_printing():
       self._printer.commands("M117 Changing filament")
       # change filament command
-      self._printer.commands("M603 U120 L125")
+      self._printer.commands("M603 U%i L%i" %(self._settings.get(["filament_unload_length"]), self._settings.get(["filament_load_length"])))
       # TODO: make these configurable variables
       self._printer.commands("M600")
       self.sendMessage('FIL','Press when new filament is ready')
@@ -186,7 +188,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
         else:
           self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
       self._printer.commands("M117 Unloading filament, stand by")
-      self._printer.commands("M603 U120 L125")
+      #self._printer.commands("M603 U120 L125")
       self._printer.commands("M600")
       self.custom_mode = "PAUSED"
       self.sendMessage('FIL','Press when new filament is ready')
@@ -296,7 +298,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     if event == octoprint.events.Events.PRINT_FAILED:
       self.sendMessage('INFO','Error: Print Failed - ' + payload.get('reason'))
       self._printer.commands("G91") #set relative mode
-      self._printer.commands("G0 Z10") #lift z 10mm
+      self._printer.commands("G0 Z20") #lift z 20mm
       #self._printer.commands("G28 Z")
       # TODO make this configurable
     if event == octoprint.events.Events.DISCONNECTED:

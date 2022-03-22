@@ -22,6 +22,8 @@ $(function() {
 		self.humidity = ko.observable(0);
 		self.humidityLow = ko.observable(); //self.settings.settings.plugins.protosthetics.hum_low);
 		self.humidityHigh = ko.observable(); //self.settings.settings.plugins.protosthetics.hum_high);
+		self.filamentLoad = ko.observable();
+		self.filamentUnload = ko.observable();
 		self.filamentStatus = ko.observable("");
 
 		self.passSerial.subscribe(function(newValue) {
@@ -39,6 +41,16 @@ $(function() {
 			                                                       data: newValue});
 		});
 		
+		self.filamentLoad.subscribe(function(newValue) {
+			OctoPrint.simpleApiCommand("protosthetics","settings",{variable: "filament_load_length", 
+			                                                       data: newValue});
+		});
+		
+		self.filamentUnload.subscribe(function(newValue) {
+			OctoPrint.simpleApiCommand("protosthetics","settings",{variable: "filament_unload_length", 
+			                                                       data: newValue});
+		});
+		
 		self.brightness.subscribe(function(newValue) {
 			console.log(newValue);
 			OctoPrint.simpleApiCommand("protosthetics","brightness",{"payload": newValue});
@@ -48,6 +60,8 @@ $(function() {
 		self.onBeforeBinding = function() {
 			self.humidityLow(self.settings.settings.plugins.protosthetics.hum_low());
 			self.humidityHigh(self.settings.settings.plugins.protosthetics.hum_high());
+			self.filamentLoad(self.settings.settings.plugins.protosthetics.filament_load_length());
+			self.filamentUnload(self.settings.settings.plugins.protosthetics.filament_unload_length());
 		}
 		
 		self.onDataUpdaterPluginMessage = function(plugin, data) {
