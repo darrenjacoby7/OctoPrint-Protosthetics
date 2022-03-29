@@ -76,6 +76,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
   # for settings plugin
   def get_template_vars(self):
     return dict(words=self._settings.get(["words"]),
+                version=self._plugin_version,
 	            hum_low=self._settings.get(["hum_low"]),
                 hum_high=self._settings.get(["hum_high"]),
                 filament_load_length=self._settings.get(["filament_load_length"]),
