@@ -325,8 +325,10 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
           return
         # everything checks out, begin upload process
         self._plugin_manager.send_plugin_message(self._identifier, 'new firmware found')
+        username = os.getlogin()
+        self._logger.warning("Username: " + username)
         #uploads = '/home/pi/.octoprint/uploads'
-        uploads = '~/.octoprint/uploads'
+        uploads = '/home/' + username + '/.octoprint/uploads'
         files = os.listdir(uploads)
         for file in files:
           if file.endswith('.bin.gcode'):
