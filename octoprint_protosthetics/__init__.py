@@ -325,7 +325,9 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
           return
         # everything checks out, begin upload process
         self._plugin_manager.send_plugin_message(self._identifier, 'new firmware found')
-        username = os.getlogin()
+        # TODO:  Find a way to generalize the username
+        os.chdir('/home')
+        username = os.listdir()[0]
         self._logger.warning("Username: " + username)
         #uploads = '/home/pi/.octoprint/uploads'
         uploads = '/home/' + username + '/.octoprint/uploads'
