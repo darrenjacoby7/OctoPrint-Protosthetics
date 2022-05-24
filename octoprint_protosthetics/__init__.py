@@ -307,10 +307,16 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     # if a firmware file was uploaded, pass it to the ESP8266
     if event == octoprint.events.Events.FILE_ADDED:
       self._logger.warning('FILE ADDED!!!' + payload.get('name'))
+      # Generalize the username
+      os.chdir('/home')
+      username = os.listdir()[0]
+      self._logger.warning("Username: " + username)
+      uploads = '/home/' + username + '/.octoprint/uploads'
       if payload.get('name').endswith('.sh.gcode'):
         self.sendMessage('POP','Script loaded')
-        uploads = '/home/pi/.octoprint/uploads'
-        scripts = '/home/pi/.octoprint/scripts'
+        scripts = '/home/' + username + '/.octoprint/scripts'
+        #uploads = '/home/pi/.octoprint/uploads'
+        #scripts = '/home/pi/.octoprint/scripts'
         files = os.listdir(uploads)
         for file in files:
           if file.endswith('.sh.gcode'):
@@ -325,12 +331,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
           return
         # everything checks out, begin upload process
         self._plugin_manager.send_plugin_message(self._identifier, 'new firmware found')
-        # TODO:  Find a way to generalize the username
-        os.chdir('/home')
-        username = os.listdir()[0]
-        self._logger.warning("Username: " + username)
+        
         #uploads = '/home/pi/.octoprint/uploads'
-        uploads = '/home/' + username + '/.octoprint/uploads'
         files = os.listdir(uploads)
         for file in files:
           if file.endswith('.bin.gcode'):
