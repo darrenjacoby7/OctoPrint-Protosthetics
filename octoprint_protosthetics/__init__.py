@@ -190,7 +190,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
           self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
       self._printer.commands("M117 Unloading filament, stand by")
       #self._printer.commands("M603 U120 L125")
-      self._printer.commands("M600 X119 Y308 Z427")
+      self._printer.commands("M600 X50 Y308 Z-180")
       self.custom_mode = "PAUSED"
       self.sendMessage('FIL','Press when new filament is ready')
     self.led.on()  # turn the lights on for filament change
