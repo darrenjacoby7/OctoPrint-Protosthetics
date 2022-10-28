@@ -14,7 +14,7 @@ plugin_package = "octoprint_protosthetics"
 plugin_name = "OctoPrint-Protosthetics"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "0.5.9XYZ3"
+plugin_version = "0.5.9XYZ3_200"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
