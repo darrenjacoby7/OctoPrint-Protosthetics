@@ -184,8 +184,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self._logger.info(self.whatItWas)
       if temps.get('tool0').get('actual') < 200:
         if self.whatItWas < 200:
-          #self._printer.set_temperature('tool0',220)
-          self._printer.commands("M109 S220")
+          #self._printer.set_temperature('tool0',200)
+          self._printer.commands("M109 S200")
         else:
           self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
       self._printer.commands("M117 Unloading filament, stand by")
