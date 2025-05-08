@@ -374,6 +374,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     }
     
     
+__plugin_identifier__ = "protosthetics"
 __plugin_name__ = "Protosthetics Plugin"
 __plugin_version__ = "0.6.0"
 __plugin_pythoncompat__ = ">=3.7,<4"
