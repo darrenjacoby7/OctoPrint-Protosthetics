@@ -206,7 +206,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     if hum > self._settings.get(['hum_high']):
       self.dryer.on()
       self.sendMessage('DRYER',1)
-    elif hum < sefl_settings.get(['hum_low']):
+    elif hum < self._settings.get(['hum_low']):
       self.dryer.off()
       self.sendMessage('DRYER',0)
         
@@ -375,7 +375,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     
     
 __plugin_name__ = "Protosthetics Plugin"
-__plugin_pythoncompat__ = ">=3,<4"
+__plugin_pythoncompat__ = ">=3.7,<4"
 
 __plugin_implementation__ = ProtostheticsPlugin()
 __plugin_hooks__ = {
