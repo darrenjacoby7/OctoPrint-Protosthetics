@@ -172,8 +172,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
       self.printer.toggle()
       self._logger.info('Printer power button pressed')
       self.sendMessage('P',self.printer.value)
-    elif command == 'changeFilament':
-      self.longPress()
+    #elif command == 'changeFilament':
+    #  self.longPress()
     elif command == 'resetESP':
       self.flash.off()
       self.ESPreset.on()
