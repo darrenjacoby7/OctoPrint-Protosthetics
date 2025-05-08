@@ -17,8 +17,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
 					   
   def __init__(self):
     #self.button1 = Button(4, hold_time=3, pull_up=None, active_state=True)
-    self.button2 = Button(5, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
-    self.button3 = Button(6, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
+    #self.button2 = Button(5, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
+    #self.button3 = Button(6, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
     self.printer = DigitalOutputDevice(22, active_high=False, initial_value=True)
     self.dryer   = DigitalOutputDevice(23, active_high=True, initial_value=False)
     self.led = PWMLED(12, initial_value=0, frequency=8000)
@@ -31,7 +31,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     #self.button1holding = False     # to skip the release function when the holding function was executed
     self.custom_mode = 0            # for custom pausing reasons 
     
-    self.button2.when_pressed = self.reportDHT
+    #self.button2.when_pressed = self.reportDHT
     
     
   def on_after_startup(self):
