@@ -16,7 +16,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
                        octoprint.plugin.SimpleApiPlugin):       # to let the JavaScript call python functions
 					   
   def __init__(self):
-    self.button1 = Button(4, hold_time=3, pull_up=None, active_state=True)
+    #self.button1 = Button(4, hold_time=3, pull_up=None, active_state=True)
     self.button2 = Button(5, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
     self.button3 = Button(6, hold_time=3, pull_up=None, active_state=True)  # depreciated on HAT 01.2022
     self.printer = DigitalOutputDevice(22, active_high=False, initial_value=True)
@@ -25,10 +25,10 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     self.flash = DigitalOutputDevice(17, active_high=False, initial_value=False)    # for flashing the ESP8266 firmware
     self.ESPreset = DigitalOutputDevice(16, active_high=False, initial_value=False) # for flashing the ESP8266 firmware
     
-    self.button1.when_pressed = self.buttonPress
-    self.button1.when_released = self.buttonRelease
-    self.button1.when_held = self.longPress
-    self.button1holding = False     # to skip the release function when the holding function was executed
+    #self.button1.when_pressed = self.buttonPress
+    #self.button1.when_released = self.buttonRelease
+    #self.button1.when_held = self.longPress
+    #self.button1holding = False     # to skip the release function when the holding function was executed
     self.custom_mode = 0            # for custom pausing reasons 
     
     self.button2.when_pressed = self.reportDHT
@@ -63,7 +63,7 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
   # This is likely not needed, as the plugin only shuts down then the system is restarting
   # But better safe than... not safe.
   def on_shutdown(self):
-    self.button1.close()
+    #self.button1.close()
     self.button2.close()
     self.button3.close()
     self.led.close()
@@ -115,86 +115,6 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
     self.send('C1')  #party colors
     self.send('P8') #progress bar with plasma
     self.send('D%i' %progress)
-
-  # bound to button 1 release
-  def buttonRelease(self):
-    # Only run this code if the button was not held
-    if self.button1holding:
-      return
-    # report to front end
-    self.sendMessage('B1','release')
-    # start the next print, or resume the print
-    if self._printer.is_ready():
-      # self.sendMessage('FUNCTION','startQueue')
-      # does it hurt to start and resume here?
-      # For the continuousPrint update, this changes to SetActive
-      self.sendMessage('FUNCTION','setActive')
-      # self.sendMessage('FUNCTION','resumeQueue')
-    if self._printer.is_paused():
-      self._printer.resume_print()
-    elif self._printer.is_printing():
-      self._printer.pause_print()
-	
-  # bound to button 1 press
-  def buttonPress(self):
-    # self.sendMessage('POP','Button was pressed')
-    # report to front end
-    self.sendMessage('B1','press')
-    # reset held variable
-    self.button1holding = False
-    
-  # bound to button 1 long-press (hold)
-  def longPress(self):
-    # report to front end
-    self.sendMessage('B1','held')
-    self.button1holding = True
-    self.send('P5')  #juggle pattern
-    self.led.blink(0.1,0.1,n=2,background=False)  #Blink front LEDs twice for 0.1 seconds
-    self.mode = self._printer.get_state_id()
-    self._logger.info(self.mode)
-    
-    # if the printer is in some paused state...
-    # run M108, which will finish the filament change and resume the print
-    # or just resume the print if a regular pause
-    if self.mode == "PAUSED" or self.mode == "PAUSING" or self.custom_mode == "PAUSED":
-      # break and continue (after filament change)
-      self._printer.commands("M108")
-      #self._printer.resume_print()
-      self._logger.info('Theoretically resuming')
-      self._logger.info(self.custom_mode)
-      if self.custom_mode:
-        self.custom_mode = 0
-        self._printer.set_temperature('tool0',self.whatItWas)
-      self.sendMessage('FIL','')
-    # if printing, initiate a filament change
-    elif self._printer.is_printing():
-      self._printer.commands("M117 Changing filament")
-      # change filament command
-      self._printer.commands("M603 U%i L%i" %(self._settings.get(["filament_unload_length"]), self._settings.get(["filament_load_length"])))
-      # TODO: make these configurable variables
-      self._printer.commands("M600")
-      self.sendMessage('FIL','Press when new filament is ready')
-    # if sitting idle, initiate a filament change
-    elif self._printer.is_ready():
-      # if the printer is not at an extruding temperature
-      # save the current temperature, set a new one, and wait for it to be hot enough
-      temps = self._printer.get_current_temperatures()
-      self.whatItWas = temps.get('tool0').get('target')
-      self._logger.info(temps)
-      self._logger.info(self.whatItWas)
-      if temps.get('tool0').get('actual') < 200:
-        if self.whatItWas < 200:
-          #self._printer.set_temperature('tool0',200)
-          self._printer.commands("M109 S200")
-        else:
-          self._printer.commands("M109 S%i" %self._printer.get_current_temperatures().get('tool0').get('target'))
-      self._printer.commands("M117 Unloading filament, stand by")
-      #self._printer.commands("M603 U120 L125")
-      self._printer.commands("M600 X119 Y308 Z-180")
-      self.custom_mode = "PAUSED"
-      self.sendMessage('FIL','Press when new filament is ready')
-    self.led.on()  # turn the lights on for filament change
-    self.sendMessage('L',self.led.value*100)
     
   # read the DHT20 sensor and report to front end
   def reportDHT(self):
