@@ -64,8 +64,8 @@ class ProtostheticsPlugin(octoprint.plugin.TemplatePlugin,      # to show up on 
   # But better safe than... not safe.
   def on_shutdown(self):
     #self.button1.close()
-    self.button2.close()
-    self.button3.close()
+    #self.button2.close()
+    #self.button3.close()
     self.led.close()
     self.printer.close()
     self.dryer.close()
